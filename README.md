@@ -6,3 +6,4 @@
 4) Natural Language-Powered Data Visualization Tool
 5) AI-Powered Collaborative Song Recommender
 6) Automated Recruitment Data Processing Pipeline (Contains sensitive info)
+7) Inventory Management System using MongoDb
