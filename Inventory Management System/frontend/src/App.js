@@ -5,7 +5,18 @@ import { Trash2, Package, LogOut, PlusSquare, AlertTriangle, RefreshCw, Box, Che
 const API_URL = "http://127.0.0.1:8000";
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('myToken'));
+  const [token, setToken] = useState(() => {
+    const t = localStorage.getItem('myToken');
+    try {
+      if (t) {
+        jwtDecode(t); // Validate token format on load
+        return t;
+      }
+    } catch (e) {
+      localStorage.removeItem('myToken');
+    }
+    return null;
+  });
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -38,8 +49,6 @@ export default function App() {
       const decoded = jwtDecode(token);
       role = decoded.role;
     } catch (e) {
-      localStorage.removeItem('myToken');
-      setToken(null);
     }
   }
 
@@ -106,18 +115,22 @@ export default function App() {
       quantity: parseInt(e.target.qty.value)
     };
 
-    const res = await fetch(`${API_URL}/add-item`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` 
-      },
-      body: JSON.stringify(newItem)
-    });
+    try {
+      const res = await fetch(`${API_URL}/add-item`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify(newItem)
+      });
 
-    if (res.ok) {
-      e.target.reset();
-      fetchItems();
+      if (res.ok) {
+        e.target.reset();
+        fetchItems();
+      }
+    } catch (error) {
+      alert("Error connecting to server. Is the backend running?");
     }
   };
 
@@ -373,6 +386,7 @@ export default function App() {
                 onChange={(e) => setEditReason(e.target.value)}
                 className="w-full text-sm border-2 border-black bg-white p-1 uppercase font-bold"
               >
+                <option value="" disabled>Select Reason</option>
                 <option value="supplier delivery">Delivery (+)</option>
                 <option value="goods moved">Export (-)</option>
                 <option value="damaged goods">Waste (-)</option>
