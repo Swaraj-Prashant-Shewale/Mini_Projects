@@ -15,4 +15,5 @@ cd ..
 :: 3. Start Frontend
 cd frontend
 start "Frontend Client" npm start
+
 cd ..
